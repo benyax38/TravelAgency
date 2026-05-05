@@ -1,10 +1,10 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTOs.CreatePackageDTO;
 import com.example.demo.Entity.TourPackageEntity;
 import com.example.demo.Repository.TourPackageRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,32 +19,60 @@ public class TourPackageService {
     }
 
     // CREATE
-    public TourPackageEntity createPackage(TourPackageEntity tourPackage) {
+    public TourPackageEntity createPackage(CreatePackageDTO tourPackageDTO) {
 
-        // El precio del paquete debe ser mayor que cero (Épica 2)
-        if (tourPackage.getPrize() == null || tourPackage.getPrize().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero");
+        // El precio del paquete debe ser mayor que cero (Épica 2) --> manejado con validaciones en la entidad
+
+
+        // ------------------------------- COMPROBACIONES DE FECHAS -------------------------------------------
+
+        // - Considerar que se puede crear un paquete con fecha "ahora" o 1 min desde ahora
+        // - Se debera definir por el cliente cual es la duracion del paquete
+        // - Cliente no tendra acceso a la fecha de termino (se calcula a partir de la duracion definida)
+
+        // Variable para fecha actual
+        LocalDateTime today = LocalDateTime.now();
+
+        // La fecha de inicio debe ser posterior a la fecha actual
+        if(tourPackageDTO.getStartDate().isBefore(today)) {
+            throw new IllegalArgumentException("La fecha de inicio no puede estar en el pasado");
         }
 
-        // La fecha de término debe ser posterior a la fecha de inicio (Épica 2)
-        if (tourPackage.getStartDate().isAfter(tourPackage.getEndDate())) {
-            throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin");
-        }
+        // Cálculo automático de la fecha de término (se puede mejorar especificando que el día termine al final del dia)
+        LocalDateTime endDate = tourPackageDTO.getStartDate().plusDays(tourPackageDTO.getDuration());
 
-        // Los cupos totales del paquete deben ser mayores que cero (Épica 2)
-        if (tourPackage.getTotalSlots() == null || tourPackage.getTotalSlots() <= 0) {
-            throw new IllegalArgumentException("El paquete debe tener al menos 1 cupo total");
-        }
+        // ------------------------------- COMPROBACIONES DE CUPOS -------------------------------------------
 
-        // Un paquete no puede publicarse como disponible si no tiene cupos (Épica 2)
-        if (tourPackage.getAvailableSlots() != null && tourPackage.getAvailableSlots() > 0) {
-            tourPackage.setPackageState(TourPackageEntity.PackageState.AVAILABLE);
-        } else {
-            throw new IllegalArgumentException("El paquete debe tener al menos 1 cupo disponible");
-        }
+        // Los cupos totales del paquete deben ser mayores que cero (Épica 2) --> manejado por CreatePackageDTO
+        // - El cliente sólo podrá elegir los cupos totales siendo este valor asignado a los cupos disponibles
+        // availableSlots <= totalSlots ¿?
 
-        // Guardar
-        return tourPackageRepository.save(tourPackage);
+        // Un paquete no puede publicarse como disponible si no tiene cupos (Épica 2) --> En el builder: availableSlots = totalSlots
+
+        // ------------------------------- BUILDER -------------------------------------------
+
+        // - El paquete inicia con estado AVAILABLE
+
+        TourPackageEntity entity = TourPackageEntity.builder()
+                .packageName(tourPackageDTO.getPackageName())
+                .destination(tourPackageDTO.getDestination())
+                .description(tourPackageDTO.getDescription())
+                .startDate(tourPackageDTO.getStartDate())
+                .duration(tourPackageDTO.getDuration())
+                .prize(tourPackageDTO.getPrize())
+                .includedServices(tourPackageDTO.getIncludedServices())
+                .conditions(tourPackageDTO.getConditions())
+                .restriction(tourPackageDTO.getRestriction())
+                .totalSlots(tourPackageDTO.getTotalSlots())
+                .availableSlots(tourPackageDTO.getTotalSlots())
+                .endDate(endDate)
+                .tripType(tourPackageDTO.getTripType())
+                .season(tourPackageDTO.getSeason())
+                .category(tourPackageDTO.getCategory())
+                .packageState(TourPackageEntity.PackageState.AVAILABLE) //
+                .build();
+
+        return tourPackageRepository.save(entity);
     }
 
     // READ
@@ -52,7 +80,7 @@ public class TourPackageService {
         return tourPackageRepository.findAll();
     }
 
-    // UPDATE
+    // UPDATE --> POR REVISAR
     // Si un paquete ya tiene reservas registradas, no deben modificarse campos críticos que
     // afecten la consistencia de la operación sin validación previa, como fechas base o cupos
     // totales menores al número ya reservado (Épica 2)
@@ -180,7 +208,7 @@ public class TourPackageService {
         return tourPackageRepository.save(existing);
     }
 
-    // DELETE
+    // DELETE --> POR REVISAR
     // Un paquete con reservas asociadas no debe eliminarse físicamente; solo puede cambiar su estado (Épica 2)
     public void cancelPackage(Long id) {
 

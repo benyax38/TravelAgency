@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DTOs.CreatePackageDTO;
 import com.example.demo.Entity.TourPackageEntity;
 import com.example.demo.Service.TourPackageService;
 import jakarta.validation.Valid;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/packages")
+@RequestMapping("/api/packages")
 public class TourPackageController {
 
     private final TourPackageService tourPackageService;
@@ -28,11 +29,12 @@ public class TourPackageController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<TourPackageEntity> createPackage(@Valid @RequestBody TourPackageEntity tourPackage) {
+    public ResponseEntity<TourPackageEntity> createPackage(@Valid @RequestBody CreatePackageDTO packageRequest) {
 
-        TourPackageEntity created = tourPackageService.createPackage(tourPackage);
+        TourPackageEntity created = tourPackageService.createPackage(packageRequest);
 
         return ResponseEntity.ok(created);
+        // return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // READ
@@ -58,7 +60,7 @@ public class TourPackageController {
     }
 
     // DELETE
-    @PutMapping("/packages/{id}/cancel")
+    @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelPackage(@PathVariable Long id) {
         tourPackageService.cancelPackage(id);
         return ResponseEntity.ok("Paquete cancelado correctamente");

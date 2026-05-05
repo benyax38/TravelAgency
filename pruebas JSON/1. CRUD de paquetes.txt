@@ -1,0 +1,65 @@
+1. Crear paquetes
+
+POST http://localhost:8080/api/packages
+
+A. Sin restricciones
+
+{
+  "packageName": "Aventura en Torres del Paine",
+  "destination": "Torres del Paine, Chile",
+  "description": "Excursión de 5 días con trekking guiado y alojamiento incluido.",
+  "startDate": "2026-01-10T08:00:00",
+  "endDate": "2026-01-15T18:00:00",
+  "duration": 5,
+  "prize": 599990.00,
+  "includedServices": "Transporte, guía, alimentación, alojamiento",
+  "conditions": "Pago anticipado del 50%",
+  "restriction": "Mayores de 12 años",
+  "availableSlots": 20,
+  "totalSlots": 20,
+  "tripType": "Aventura",
+  "season": "Verano",
+  "category": "Premium",
+  "packageState": "AVAILABLE"
+}
+
+B. El precio del paquete es menor que 0
+
+{
+  "packageName": "Aventura en Torres del Paine",
+  "destination": "Torres del Paine, Chile",
+  "description": "Excursión de 5 días con trekking guiado y alojamiento incluido.",
+  "startDate": "2026-01-10T08:00:00",
+  "endDate": "2026-01-15T18:00:00",
+  "duration": 5,
+  "prize": -1,
+  "includedServices": "Transporte, guía, alimentación, alojamiento",
+  "conditions": "Pago anticipado del 50%",
+  "restriction": "Mayores de 12 años",
+  "availableSlots": 20,
+  "totalSlots": 20,
+  "tripType": "Aventura",
+  "season": "Verano",
+  "category": "Premium",
+  "packageState": "AVAILABLE"
+}
+
+2. Obtener todos los paquetes
+
+GET http://localhost:8080/api/packages
+
+3. Actualizar paquetes
+
+PATCH http://localhost:8080/api/packages/{id}
+
+{
+  "packageName": "Aventura en Torres del Paine EXTREMO",
+  "description": "Incluye trekking avanzado y kayak",
+  "prize": 649990.00,
+  "availableSlots": 15
+}
+
+4. Eliminar paquetes (no físicamente --> cambia estado a cancelado)
+
+PUT http://localhost:8080/api/packages/{id}/cancel
+
