@@ -1,0 +1,12 @@
+1. Crear usuario
+
+POST http://localhost:8080/api/users
+
+{
+  "firstName": "Benjamin",
+  "lastName": "Sandoval",
+  "mail": "benja@email.com",
+  "phone": "123456789",
+  "dni": "12345678-9",
+  "nationality": "Chilena"
+}

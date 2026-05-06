@@ -3,6 +3,8 @@ package com.example.demo.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,8 +42,16 @@ public class ReservationEntity {
     @Column(name = "customer_preferences", length = 256)
     private String customerPreferences;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "reservation_state", length = 40)
-    private String reservationState;
+    private ReservationState reservationState;
+
+    public enum ReservationState {
+        PENDING,     // recién creada, esperando pago
+        PAID,   // pagada
+        ANULLED,   // cancelada por usuario o sistema
+        EXPIRED      // no se pagó a tiempo
+    }
 
     @Column(name = "reservation_date")
     private LocalDateTime reservationDate;

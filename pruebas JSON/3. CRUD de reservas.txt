@@ -1,0 +1,12 @@
+1. Crear reserva (requiere crear usuario y paquete)
+
+POST http://localhost:8080/api/reservations
+
+{
+  "userId": 1,
+  "packageId": 1,
+  "passengersNum": 2,
+  "companionsDetails": "Adulto + niño",
+  "specialRequests": "Comida vegetariana",
+  "customerPreferences": "Asientos juntos"
+}

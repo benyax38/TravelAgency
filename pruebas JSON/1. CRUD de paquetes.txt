@@ -2,47 +2,35 @@
 
 POST http://localhost:8080/api/packages
 
-A. Sin restricciones
+--> Completo
 
 {
   "packageName": "Aventura en Torres del Paine",
   "destination": "Torres del Paine, Chile",
   "description": "Excursión de 5 días con trekking guiado y alojamiento incluido.",
-  "startDate": "2026-01-10T08:00:00",
-  "endDate": "2026-01-15T18:00:00",
+  "startDate": "2027-01-10T08:00:00",
   "duration": 5,
   "prize": 599990.00,
   "includedServices": "Transporte, guía, alimentación, alojamiento",
   "conditions": "Pago anticipado del 50%",
   "restriction": "Mayores de 12 años",
-  "availableSlots": 20,
   "totalSlots": 20,
   "tripType": "Aventura",
   "season": "Verano",
-  "category": "Premium",
-  "packageState": "AVAILABLE"
+  "category": "Premium"
 }
 
-B. El precio del paquete es menor que 0
+--> Mínimo viable (que cubre casillas obligatorias):
 
 {
   "packageName": "Aventura en Torres del Paine",
   "destination": "Torres del Paine, Chile",
-  "description": "Excursión de 5 días con trekking guiado y alojamiento incluido.",
-  "startDate": "2026-01-10T08:00:00",
-  "endDate": "2026-01-15T18:00:00",
+  "startDate": "2027-01-10T08:00:00",
   "duration": 5,
-  "prize": -1,
-  "includedServices": "Transporte, guía, alimentación, alojamiento",
-  "conditions": "Pago anticipado del 50%",
-  "restriction": "Mayores de 12 años",
-  "availableSlots": 20,
-  "totalSlots": 20,
-  "tripType": "Aventura",
-  "season": "Verano",
-  "category": "Premium",
-  "packageState": "AVAILABLE"
+  "prize": 599990.00,
+  "totalSlots": 20
 }
+
 
 2. Obtener todos los paquetes
 

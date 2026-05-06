@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<ReservationEntity,Long> {
+
+    // Permite contar reservas por paquete
+    Long countByTourPackage_PackageId(Long packageId);
 }

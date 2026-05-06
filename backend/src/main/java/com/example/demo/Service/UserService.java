@@ -16,7 +16,26 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // Metodo simple para probar el backend
+    // CREATE
+    public UserEntity createUser(UserEntity user) {
+
+        // Validación básica de duplicados
+        if (userRepository.existsByMail(user.getMail())) {
+            throw new RuntimeException("El correo ya está registrado");
+        }
+
+        if (userRepository.existsByDni(user.getDni())) {
+            throw new RuntimeException("El DNI ya está registrado");
+        }
+
+        // Valores por defecto
+        user.setUserState("ACTIVE");
+        user.setPaidReservations(0);
+
+        return userRepository.save(user);
+    }
+
+    // READ
     public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
     }
