@@ -12,37 +12,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "discounts")
+@Table(name = "reservation_discounts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiscountEntity {
+public class ReservationDiscountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "discount_id")
-    private Long discountId;
+    private Long reservationDiscountId;
 
-    @Column(name = "discount_type", length = 40)
-    private String discountType;
-
-    @Column(name = "percentage")
-    private Integer percentage;
-
-    @Column(name = "start_date_dis")
-    private LocalDateTime startDateDis;
-
-    @Column(name = "end_date_dis")
-    private LocalDateTime endDateDis;
-
-    @Column(name = "discount_limit")
-    private Integer discountLimit;
-
-    // Relación con Reservation
     @ManyToOne
     @JoinColumn(name = "reservation_id")
     private ReservationEntity reservation;
+
+    @ManyToOne
+    @JoinColumn(name = "discount_config_id")
+    private ConfigAdminDiscountEntity discountConfig;
+
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;
 }

@@ -1,0 +1,13 @@
+POST /api/discount-configs
+
+{
+  "discountType": "GROUP_DISCOUNT",
+  "percentage": 15,
+  "minPassengers": 4,
+  "active": true
+}
+
+GET	/api/discount-configs	Obtener todos
+GET	/api/discount-configs/{id}	Obtener por id
+POST	/api/discount-configs	Crear
+DELETE	/api/discount-configs/{id}	Eliminar
