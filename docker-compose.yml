@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  # 1. Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15
+    container_name: travel_agency_db
+    environment:
+      POSTGRES_DB: travel_agency_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Servidor de Identidad (Keycloak)
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak_auth
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/travel_agency_db
+      KC_DB_USERNAME: user
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - backend-network
+      - frontend-network
+
+  # 3. Backend (Spring Boot) - Replicado como el ejemplo del prof
+  backend1: &backend_base
+    build: ./backend # Asumiendo que tienes tu Dockerfile aquí
+    environment:
+      - DB_HOST=db
+      - KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/TravelAgencyRealm
+    depends_on:
+      - db
+      - keycloak
+    networks:
+      - backend-network
+
+  backend2:
+    <<: *backend_base
+
+  # 4. Frontend (React + Vite)
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_KEYCLOAK_URL=http://localhost:8080
+    networks:
+      - frontend-network
+
+  # 5. Balanceador de Carga (Nginx) - Solo uno para simplificar el inicio
+  nginx-backend:
+    image: nginx:latest
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx-backend.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend1
+      - backend2
+    networks:
+      - backend-network
+
+volumes:
+  postgres_data:
+
+networks:
+  frontend-network:
+  backend-network:

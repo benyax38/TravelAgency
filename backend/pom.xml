@@ -66,6 +66,8 @@
 	</dependencies>
 
 	<build>
+		<finalName>travel-agency</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
