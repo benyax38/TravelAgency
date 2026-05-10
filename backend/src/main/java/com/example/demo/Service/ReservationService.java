@@ -2,13 +2,9 @@ package com.example.demo.Service;
 
 import com.example.demo.Config.ResourceNotFoundException;
 import com.example.demo.DTOs.ReservationRequestDTO;
-import com.example.demo.Entity.ConfigAdminDiscountEntity;
-import com.example.demo.Entity.ReservationDiscountEntity;
 import com.example.demo.Entity.ReservationEntity;
 import com.example.demo.Entity.TourPackageEntity;
 import com.example.demo.Entity.UserEntity;
-import com.example.demo.Repository.ConfigAdminDiscountRepository;
-import com.example.demo.Repository.ReservationDiscountRepository;
 import com.example.demo.Repository.ReservationRepository;
 import com.example.demo.Repository.TourPackageRepository;
 import com.example.demo.Repository.UserRepository;
@@ -16,10 +12,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -27,57 +21,74 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final TourPackageRepository tourPackageRepository;
-    private final ConfigAdminDiscountRepository configAdminDiscountRepository;
-    private final ReservationDiscountRepository reservationDiscountRepository;
+    private final DiscountApplicationService discountApplicationService;
 
-    // Inyección por constructor (recomendado)
-    public ReservationService(ReservationRepository reservationRepository,
-                              UserRepository userRepository,
-                              TourPackageRepository tourPackageRepository, ConfigAdminDiscountRepository configAdminDiscountRepository, ReservationDiscountRepository reservationDiscountRepository) {
+    // Inyección por constructor
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            UserRepository userRepository,
+            TourPackageRepository tourPackageRepository,
+            DiscountApplicationService discountApplicationService) {
+
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.tourPackageRepository = tourPackageRepository;
-        this.configAdminDiscountRepository = configAdminDiscountRepository;
-        this.reservationDiscountRepository = reservationDiscountRepository;
+        this.discountApplicationService = discountApplicationService;
     }
 
     // CREATE
     @Transactional
-    public ReservationEntity createReservation(ReservationRequestDTO reservationDTO) {
+    public ReservationEntity createReservation(
+            ReservationRequestDTO reservationDTO) {
 
         // Validaciones de existencia
         UserEntity user = userRepository.findById(reservationDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario no encontrado"));
 
-        TourPackageEntity tourPackage = tourPackageRepository.findById(reservationDTO.getPackageId())
+        TourPackageEntity tourPackage = tourPackageRepository.findById(
+                        reservationDTO.getPackageId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Paquete no encontrado"));
 
-        // Reglas de negocio
+        // Validaciones de negocio
         validateReservation(reservationDTO, tourPackage);
 
-        // Crear la entidad de reserva
-        ReservationEntity reservation = buildReservation(reservationDTO, user, tourPackage);
+        // Crear reserva
+        ReservationEntity reservation =
+                buildReservation(reservationDTO, user, tourPackage);
 
-        // Calcular el precio base (subtotal = precio_paquete * num_pasajeros)
-        BigDecimal subtotal = calculateSubtotal(tourPackage, reservationDTO);
+        // Subtotal inicial (precio_paquete * num_pasajeros)
+        BigDecimal subtotal =
+                calculateSubtotal(tourPackage, reservationDTO);
 
-        // Aplicar descuentos
-        BigDecimal finalAmount = applyDiscounts(reservation, subtotal, reservationDTO);
-
-        // Valor del descuento aplicado
-        BigDecimal discountAmount = subtotal.subtract(finalAmount);
-
-        // Asignar valores a la entidad
+        // Guardar reserva parcial sin descuentos
         reservation.setSubtotalAmount(subtotal);
-        reservation.setDiscountAmount(discountAmount);
-        reservation.setTotalAmount(finalAmount);
+        reservation.setTotalAmount(subtotal);
 
-        // Descontar los cupos al paquete
+        ReservationEntity savedReservation =
+                reservationRepository.save(reservation);
+
+        // Obtiene el monto de descuento total
+        BigDecimal discountAmount =
+                discountApplicationService.applyDiscounts(
+                        savedReservation,
+                        subtotal,
+                        reservationDTO
+                );
+
+        // Obtiene el monto final con descuento aplicado
+        BigDecimal finalAmount =
+                subtotal.subtract(discountAmount);
+
+        // Actualizar reserva con descuentos
+        savedReservation.setDiscountAmount(discountAmount);
+        savedReservation.setTotalAmount(finalAmount);
+
+        // Actualizar cupos
         updateAvailableSlots(tourPackage, reservationDTO);
 
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(savedReservation);
     }
 
     public void validateReservation(ReservationRequestDTO reservationDTO, TourPackageEntity tourPackage) {
@@ -148,67 +159,6 @@ public class ReservationService {
                                 reservationDTO.getPassengersNum()
                         )
                 );
-    }
-
-    public BigDecimal applyDiscounts(
-            ReservationEntity reservation,
-            BigDecimal subtotal,
-            ReservationRequestDTO reservationDTO) {
-
-        BigDecimal finalAmount = subtotal;
-
-        finalAmount = discountNumPassengers(
-                reservation,
-                finalAmount,
-                reservationDTO
-        );
-
-        return finalAmount;
-    }
-
-    public BigDecimal discountNumPassengers(
-            ReservationEntity reservation,
-            BigDecimal currentAmount,
-            ReservationRequestDTO reservationDTO) {
-
-        Optional<ConfigAdminDiscountEntity> optionalDiscount =
-                configAdminDiscountRepository
-                        .findByDiscountTypeAndActiveTrue(
-                                ConfigAdminDiscountEntity.DiscountType.GROUP_DISCOUNT);
-
-        if(optionalDiscount.isPresent()) {
-
-            ConfigAdminDiscountEntity discount =
-                    optionalDiscount.get();
-
-            // Verificar mínimo de pasajeros
-            if (reservationDTO.getPassengersNum() >= discount.getMinPassengers()) {
-
-                BigDecimal percentage =
-                        BigDecimal.valueOf(discount.getPercentage());
-
-                BigDecimal discountAmount =
-                        currentAmount.multiply(percentage)
-                                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-                BigDecimal finalAmount =
-                        currentAmount.subtract(discountAmount);
-
-                // Guardar descuento aplicado
-                ReservationDiscountEntity reservationDiscount =
-                        new ReservationDiscountEntity();
-
-                reservationDiscount.setReservation(reservation);
-                reservationDiscount.setDiscountConfig(discount);
-                reservationDiscount.setDiscountAmount(discountAmount);
-
-                reservationDiscountRepository.save(reservationDiscount);
-
-                return finalAmount;
-            }
-        }
-
-        return currentAmount;
     }
 
     public void updateAvailableSlots(

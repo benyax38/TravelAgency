@@ -1,5 +1,6 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,8 +40,9 @@ public class PaymentEntity {
     @Column(name = "payment_state", length = 40)
     private String paymentState;
 
-    // Relación 1:1 con Reservation
+    // Relación 1:1 con Purchase/compra
     @OneToOne
-    @JoinColumn(name = "reservation_id", unique = true)
-    private ReservationEntity reservation;
+    @JoinColumn(name = "purchase_id")
+    @JsonBackReference
+    private PurchaseEntity purchase;
 }

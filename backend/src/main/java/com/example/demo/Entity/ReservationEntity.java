@@ -78,4 +78,10 @@ public class ReservationEntity {
     @JoinColumn(name = "package_id")
     @JsonBackReference
     private TourPackageEntity tourPackage;
+
+    // Relación con Purchase (muchas reservas se asocia a una única compra --> carrito de compras)
+    @ManyToOne
+    @JoinColumn(name = "purchase_id")
+    @JsonBackReference
+    private PurchaseEntity purchase;
 }
