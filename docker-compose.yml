@@ -27,7 +27,9 @@ services:
       KC_DB_PASSWORD: password
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
+    command: start-dev --import-realm
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json
     ports:
       - "8080:8080"
     depends_on:
@@ -42,6 +44,10 @@ services:
     environment:
       - DB_HOST=db
       - KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/TravelAgencyRealm
+      # ESTA LÍNEA ES LA CLAVE:
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8080/realms/TravelAgencyRealm
+      # Y ESTA PARA QUE SEPA A DÓNDE IR FÍSICAMENTE:
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/TravelAgencyRealm/protocol/openid-connect/certs
     depends_on:
       - db
       - keycloak
@@ -53,9 +59,15 @@ services:
 
   # 4. Frontend (React + Vite)
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
-      - "5173:80"
+      - "5173:5173"
+    volumes:
+    - ./frontend:/app # Sincroniza tu carpeta local con /app en Docker [cite: 229, 237]
+    - /app/node_modules # Evita que Docker intente sobreescribir los módulos instalados [cite: 237]
+    - ./.env:/app/.env
     environment:
       - VITE_KEYCLOAK_URL=http://localhost:8080
     networks:

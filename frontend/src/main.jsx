@@ -5,25 +5,26 @@ import App from './App.jsx'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Keycloak from 'keycloak-js';
 
-// 1. Configuración de Keycloak usando tus variables de entorno (.env)
-const keycloak = new Keycloak({
-  url: import.meta.env.VITE_KEYCLOAK_URL,   // http://localhost:8080
-  realm: import.meta.env.VITE_KEYCLOAK_REALM, // TravelAgencyRealm
-  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID, // frontend-client
+// 1. Configuración de Keycloak
+// AÑADIMOS 'export' para que otros componentes (como Sidebar) puedan usarlo
+export const keycloak = new Keycloak({
+  url: import.meta.env.VITE_KEYCLOAK_URL,
+  realm: import.meta.env.VITE_KEYCLOAK_REALM,
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
 });
 
-// Exponer la instancia temporalmente
+// Exponer la instancia para depuración en consola (opcional)
 window._keycloak = keycloak;
 
 // 2. Inicialización de la sesión
 keycloak.init({ 
-  onLoad: 'login-required', // Obliga a loguearse para ver la app 
-  checkLoginIframe: false 
+  onLoad: 'login-required', 
+  checkLoginIframe: false,
+  // Esto es útil para evitar problemas de redirección tras el login
+  pkceMethod: 'S256' 
 }).then((authenticated) => {
   if (authenticated) {
-    // IMPORTANTE: Configurar el refresco automático del token
-    // Esto asegura que si el usuario pasa mucho tiempo en la app, 
-    // el token no expire y el backend no lance un 401.
+    // Configurar el refresco automático del token
     setInterval(() => {
       keycloak.updateToken(70).then((refreshed) => {
         if (refreshed) {
@@ -32,26 +33,25 @@ keycloak.init({
       }).catch(() => {
         console.error('Error al refrescar el token');
       });
-    }, 60000); // Revisa cada minuto
+    }, 60000);
 
-    // 3. Si está autenticado, renderizamos la aplicación
+    // 3. Renderizamos la aplicación
     createRoot(document.getElementById('root')).render(
       <StrictMode>
+        {/* Ya no es estrictamente necesario pasar keycloak por props si lo exportas, 
+            pero dejarlo aquí no rompe nada */}
         <App keycloak={keycloak} />
       </StrictMode>,
     );
   } else {
-    // REEMPLAZO: En lugar de reload(), informamos el problema
-    console.warn("El usuario no pudo ser autenticado por Keycloak.");
-    // Opcionalmente podrías redirigir a una página de "Acceso Denegado"
+    console.warn("El usuario no pudo ser autenticado.");
   }
 }).catch((error) => {
-  // Aquí caen los errores de red o de configuración del .env
   console.error("Error crítico al conectar con Keycloak:", error);
   document.body.innerHTML = `
-    <div style="color: red; text-align: center; margin-top: 50px;">
-      <h1>Error de Autenticación</h1>
-      <p>No se pudo establecer conexión con el servidor de identidad.</p>
+    <div style="color: white; background-color: #151515; text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+      <h1 style="color: #0066cc;">Error de Autenticación</h1>
+      <p>No se pudo conectar con Keycloak. Revisa si el contenedor está arriba.</p>
     </div>
   `;
 });

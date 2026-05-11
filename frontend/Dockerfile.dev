@@ -1,0 +1,7 @@
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+# El flag --host es VITAL para que Docker permita ver la app desde fuera [cite: 789, 794]
+CMD ["npm", "run", "dev", "--", "--host"]

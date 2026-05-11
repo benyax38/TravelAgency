@@ -19,6 +19,8 @@ httpClient.interceptors.request.use(
     // acceder al objeto keycloak globalmente o pasar el token aquí.
     const token = window._keycloak?.token; 
 
+    console.log("Token enviado:", token);
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
