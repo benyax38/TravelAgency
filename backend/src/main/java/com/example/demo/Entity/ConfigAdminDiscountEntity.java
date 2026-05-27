@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "discount_configs")
 @Data
@@ -30,15 +32,29 @@ public class ConfigAdminDiscountEntity {
     public enum DiscountType {
         GROUP_DISCOUNT,
         FREQUENT_CUSTOMER,
-        SEASONAL
+        MULTI_PACKAGE
     }
 
     @Column(name = "percentage", nullable = false)
     private Integer percentage;
 
-    // Umbral mínimo de pasajeros
-    @Column(name = "min_passengers", nullable = false)
+    // GROUP_DISCOUNT
+    @Column(name = "min_passengers")
     private Integer minPassengers;
+
+    // FREQUENT_CUSTOMER
+    @Column(name = "min_reservations")
+    private Integer minReservations;
+
+    // MULTI_PACKAGE
+    @Column(name = "period_days")
+    private Integer periodDays;
+
+    @Column(name = "promotion_start_date")
+    private LocalDateTime promotionStartDate;
+
+    @Column(name = "promotion_end_date")
+    private LocalDateTime promotionEndDate;
 
     @Column(name = "active", nullable = false)
     private Boolean active;
