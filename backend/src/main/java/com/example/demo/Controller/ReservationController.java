@@ -2,9 +2,11 @@ package com.example.demo.Controller;
 
 
 import com.example.demo.DTOs.ReservationRequestDTO;
+import com.example.demo.DTOs.ReservationSummaryDTO;
 import com.example.demo.Entity.ReservationEntity;
 import com.example.demo.Service.ReservationService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,15 +29,17 @@ public class ReservationController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<?> createReservation(@Valid @RequestBody ReservationRequestDTO reservationRequest) {
+    public ResponseEntity<ReservationSummaryDTO> createReservation(
+            @Valid @RequestBody ReservationRequestDTO reservationRequest) {
 
-        try {
-            ReservationEntity reservation = reservationService.createReservation(reservationRequest);
-            return ResponseEntity.ok(reservation);
+        ReservationSummaryDTO response =
+                reservationService.createReservation(
+                        reservationRequest
+                );
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     // READ
