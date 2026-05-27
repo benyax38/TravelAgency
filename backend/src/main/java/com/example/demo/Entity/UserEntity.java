@@ -2,6 +2,8 @@ package com.example.demo.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,14 +23,20 @@ public class UserEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(unique = true)
+    private String keycloakId;
+
+    @Column(name = "username", unique = true, length = 80)
+    private String username;
+
     @Column(name = "first_name", length = 80)
     private String firstName;
 
     @Column(name = "last_name", length = 80)
     private String lastName;
 
-    @Column(name = "mail", length = 80)
-    private String mail;
+    @Column(name = "email", unique = true, length = 80)
+    private String email;
 
     @Column(name = "phone", length = 20)
     private String phone;
@@ -39,9 +47,16 @@ public class UserEntity {
     @Column(name = "nationality", length = 80)
     private String nationality;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_state", length = 40)
-    private String userState;
+    private UserState userState;
+
+    public enum UserState {
+        ACTIVE,
+        BLOCKED,
+        INACTIVE
+    }
 
     @Column(name = "paid_reservations")
-    private Integer paidReservations;
+    private Integer paidReservations = 0;
 }
