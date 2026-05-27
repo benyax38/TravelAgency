@@ -1,11 +1,17 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTOs.CreatePackageDTO;
+import com.example.demo.Entity.ReservationEntity;
+import com.example.demo.Entity.ReservationPackageEntity;
 import com.example.demo.Entity.TourPackageEntity;
 import com.example.demo.Repository.TourPackageRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,6 +86,34 @@ public class TourPackageService {
         return tourPackageRepository.findAll();
     }
 
+    public List<TourPackageEntity> getVisiblePackagesForUsers() {
+
+        return tourPackageRepository.findTop6ByPackageStateIn(
+                List.of(
+                        TourPackageEntity.PackageState.AVAILABLE,
+                        TourPackageEntity.PackageState.NOT_AVAILABLE
+                )
+        );
+    }
+
+    public List<TourPackageEntity> searchPackages(
+            String destination,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Integer duration,
+            String tripType
+    ) {
+
+        return tourPackageRepository.searchPackages(
+                destination,
+                minPrice,
+                maxPrice,
+                duration,
+                tripType,
+                LocalDateTime.now()
+        );
+    }
+
     // UPDATE --> POR REVISAR
     // Si un paquete ya tiene reservas registradas, no deben modificarse campos críticos que
     // afecten la consistencia de la operación sin validación previa, como fechas base o cupos
@@ -91,7 +125,7 @@ public class TourPackageService {
                 .orElseThrow(() -> new RuntimeException("Paquete no encontrado"));
 
         // 🔍 2. Determinar si el paquete tiene reservas asociadas
-        boolean hasReservations = !existing.getReservations().isEmpty();
+        boolean hasReservations = !existing.getReservationPackages().isEmpty();
 
         // 📅 Variables útiles
         LocalDateTime today = LocalDateTime.now();
@@ -173,7 +207,11 @@ public class TourPackageService {
 
             // ⚠️ Caso 3: Validación de cupos con reservas existentes
             // (Aquí sí importa la cantidad reservada)
-            int reservedSlots = existing.getReservations().size(); // simplificado
+            int reservedSlots = existing.getReservationPackages()
+                    .stream()
+                    .map(ReservationPackageEntity::getReservation)
+                    .mapToInt(ReservationEntity::getPassengersNum)
+                    .sum();
 
             if (newTotalSlots != null && newTotalSlots < reservedSlots) {
                 throw new IllegalArgumentException(
@@ -226,5 +264,46 @@ public class TourPackageService {
 
         pkg.setPackageState(TourPackageEntity.PackageState.CANCELLED);
         tourPackageRepository.save(pkg);
+    }
+
+
+    //@Scheduled(cron = "*/15 * * * * *") // 15 segundos
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void updatePackagesAvailability() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<TourPackageEntity> packages =
+                tourPackageRepository.findByPackageState(
+                        TourPackageEntity.PackageState.AVAILABLE
+                );
+
+        List<TourPackageEntity> updatedPackages =
+                new ArrayList<>();
+
+        for (TourPackageEntity pkg : packages) {
+
+            if (pkg.getStartDate() == null) {
+                continue;
+            }
+
+            LocalDateTime limitDate =
+                    pkg.getStartDate().minusDays(1);
+
+            if (!now.isBefore(limitDate)) {
+
+                pkg.setPackageState(
+                        TourPackageEntity.PackageState.NOT_AVAILABLE
+                );
+
+                updatedPackages.add(pkg);
+            }
+        }
+
+        if (!updatedPackages.isEmpty()) {
+
+            tourPackageRepository.saveAll(updatedPackages);
+        }
     }
 }

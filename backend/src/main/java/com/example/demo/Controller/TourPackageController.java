@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -41,6 +43,46 @@ public class TourPackageController {
     @GetMapping
     public List<TourPackageEntity> getAllPackagesController() {
         return tourPackageService.getAllPackagesService();
+    }
+
+    @GetMapping("/public")
+    public ResponseEntity<List<TourPackageEntity>> getVisiblePackages() {
+
+        List<TourPackageEntity> packages =
+                tourPackageService.getVisiblePackagesForUsers();
+
+        return ResponseEntity.ok(packages);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<TourPackageEntity>>
+    searchPackages(
+
+            @RequestParam(required = false)
+            String destination,
+
+            @RequestParam(required = false)
+            BigDecimal minPrice,
+
+            @RequestParam(required = false)
+            BigDecimal maxPrice,
+
+            @RequestParam(required = false)
+            Integer duration,
+
+            @RequestParam(required = false)
+            String tripType
+    ) {
+
+        return ResponseEntity.ok(
+                tourPackageService.searchPackages(
+                        destination,
+                        minPrice,
+                        maxPrice,
+                        duration,
+                        tripType
+                )
+        );
     }
 
     // UPDATE

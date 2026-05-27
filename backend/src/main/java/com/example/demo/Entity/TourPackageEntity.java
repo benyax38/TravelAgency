@@ -16,10 +16,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -101,8 +104,11 @@ public class TourPackageEntity {
         CANCELLED
     }
 
+    @Builder.Default
     @OneToMany(mappedBy = "tourPackage")
-    @JsonManagedReference
-    private List<ReservationEntity> reservations;
+    @JsonManagedReference("package-reference")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<ReservationPackageEntity> reservationPackages = new ArrayList<>();
 
 }
