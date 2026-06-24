@@ -11,3 +11,49 @@ GET	/api/discount-configs	Obtener todos
 GET	/api/discount-configs/{id}	Obtener por id
 POST	/api/discount-configs	Crear
 DELETE	/api/discount-configs/{id}	Eliminar
+
+Tests
+
+{
+  "discountType": "GROUP_DISCOUNT",
+  "percentage": 10,
+  "minPassengers": 4,
+  "minReservations": null,
+  "periodDays": null,
+  "promotionStartDate": null,
+  "promotionEndDate": null,
+  "active": true
+}
+
+{
+  "discountType": "FREQUENT_CUSTOMER",
+  "percentage": 15,
+  "minPassengers": null,
+  "minReservations": 5,
+  "periodDays": null,
+  "promotionStartDate": null,
+  "promotionEndDate": null,
+  "active": true
+}
+
+{
+  "discountType": "MULTI_PACKAGE",
+  "percentage": 20,
+  "minPassengers": null,
+  "minReservations": null,
+  "periodDays": 30,
+  "promotionStartDate": null,
+  "promotionEndDate": null,
+  "active": true
+}
+
+{
+  "discountType": "GROUP_DISCOUNT",
+  "percentage": 25,
+  "minPassengers": 8,
+  "minReservations": null,
+  "periodDays": null,
+  "promotionStartDate": "2026-06-01T00:00:00",
+  "promotionEndDate": "2026-06-30T23:59:59",
+  "active": true
+}

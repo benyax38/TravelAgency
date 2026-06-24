@@ -10,3 +10,30 @@ POST http://localhost:8080/api/reservations
   "specialRequests": "Comida vegetariana",
   "customerPreferences": "Asientos juntos"
 }
+
+{
+    "userId": 1,
+    "packageIds": [1, 2, 5],
+    "passengersNum": 3,
+    "companionsDetails": "2 adultos y 1 niño",
+    "specialRequests": "Comida vegetariana",
+    "customerPreferences": "Habitaciones contiguas"
+}
+
+{
+    "userId": 1,
+    "packageIds": [],
+    "passengersNum": 2
+}
+
+{
+    "userId": 1,
+    "packageIds": [1],
+    "passengersNum": 0
+}
+
+{
+    "userId": 1,
+    "packageIds": [1, null, 5],
+    "passengersNum": 2
+}
