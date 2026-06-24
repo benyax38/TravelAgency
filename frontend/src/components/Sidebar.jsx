@@ -59,9 +59,48 @@ const Sidebar = () => {
             </button>
             {openUser && (
               <div className="submenu">
-                <Link to="/perfil" style={linkStyle}>Ver perfil</Link>
-                <Link to="/paquetes" style={linkStyle}>Ver paquetes</Link>
-                <Link to="/reservas" style={linkStyle}>Ver reservas</Link>
+                <Link 
+                    to="/perfil" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver perfil
+                </Link>
+                <Link 
+                    to="/user/paquetes" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver paquetes
+                </Link>
+                <Link 
+                    to="/carrito" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver carrito
+                </Link>
                 <Link to="/pagos" style={linkStyle}>Ver pagos</Link>
               </div>
             )}
@@ -76,7 +115,34 @@ const Sidebar = () => {
             </button>
             {openAdmin && (
               <div className="submenu">
-                <Link to="/admin/usuarios" style={linkStyle}>Usuarios</Link>
+                <Link 
+                    to="/admin/config-discount" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver descuentos (admin)
+                </Link>
+                <Link 
+                    to="/admin/usuarios" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver usuarios (admin)
+                </Link>
                 <Link 
                     to="/admin/paquetes" 
                     style={{ 
@@ -91,7 +157,20 @@ const Sidebar = () => {
                 >
                     Ver paquetes (admin)
                 </Link>
-                <Link to="/admin/reservas" style={linkStyle}>Reservas</Link>
+                <Link 
+                    to="/admin/reservas" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Ver reservas (admin)
+                </Link>
                 <Link to="/admin/pagos" style={linkStyle}>Pagos</Link>
               </div>
             )}
