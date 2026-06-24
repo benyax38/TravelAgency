@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,6 +67,23 @@ public class ConfigAdminDiscountController {
                 discountService.createDiscountConfig(discountConfig);
 
         return ResponseEntity.ok(created);
+    }
+
+    /**
+     * Modifica una configuración.
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<ConfigAdminDiscountEntity> updateDiscount(
+            @PathVariable Long id,
+            @RequestBody
+            ConfigAdminDiscountEntity discount
+    ){
+        return ResponseEntity.ok(
+                discountService.updateDiscount(
+                        id,
+                        discount
+                )
+        );
     }
 
     /**

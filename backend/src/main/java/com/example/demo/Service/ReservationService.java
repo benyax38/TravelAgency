@@ -12,11 +12,15 @@ import com.example.demo.Repository.ReservationRepository;
 import com.example.demo.Repository.TourPackageRepository;
 import com.example.demo.Repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ReservationService {
@@ -53,7 +57,10 @@ public class ReservationService {
             ReservationRequestDTO reservationDTO) {
 
         // Validaciones de existencia
-        UserEntity user = findUserById(reservationDTO.getUserId());
+        UserEntity user = getAuthenticatedUser();
+
+        System.out.println(user.getUserId());
+        System.out.println(user.getEmail());
 
         List<TourPackageEntity> tourPackages =
                 findPackagesByIds(reservationDTO.getPackageIds());
@@ -134,17 +141,39 @@ public class ReservationService {
     }
 
     /*
-     * findUserbyId
+     * getAuthenticatedUser
      * Descripcion: Comprueba si existe el usuario en la base de datos
-     * Entrada: Id de usuario
+     * Entrada: void
      * Salida: Entidad usuario
      * */
-    private UserEntity findUserById(Long userId) {
+    private UserEntity getAuthenticatedUser() {
 
-        return userRepository.findById(userId)
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null) {
+
+            throw new RuntimeException(
+                    "No hay usuario autenticado"
+            );
+        }
+
+        Jwt jwt =
+                (Jwt) authentication.getPrincipal();
+
+        @SuppressWarnings("ConstantConditions")
+        String keycloakId = Objects.requireNonNull(
+                jwt.getSubject(),
+                "El token no contiene subject"
+        );
+
+        return userRepository
+                .findByKeycloakId(keycloakId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Usuario no encontrado"
+                        new RuntimeException(
+                                "Usuario autenticado no encontrado"
                         )
                 );
     }

@@ -10,8 +10,6 @@ import java.util.List;
 
 @Data
 public class ReservationRequestDTO {
-    @NotNull(message = "El userId es obligatorio")
-    private Long userId;
 
     @NotEmpty(message = "Debe seleccionar al menos un paquete")
     private List<@NotNull Long> packageIds;

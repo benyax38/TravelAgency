@@ -11,4 +11,5 @@ public interface ConfigAdminDiscountRepository extends JpaRepository<ConfigAdmin
 
     Optional<ConfigAdminDiscountEntity>
     findByDiscountTypeAndActiveTrue(ConfigAdminDiscountEntity.DiscountType discountType);
+    boolean existsByDiscountType(ConfigAdminDiscountEntity.DiscountType discountType);
 }

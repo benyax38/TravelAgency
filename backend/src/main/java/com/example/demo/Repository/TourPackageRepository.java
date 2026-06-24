@@ -22,40 +22,40 @@ public interface TourPackageRepository extends JpaRepository<TourPackageEntity,L
     );
 
     @Query("""
-    SELECT p
-    FROM TourPackageEntity p
-    WHERE p.packageState IN (
-        com.example.demo.Entity.TourPackageEntity.PackageState.AVAILABLE,
-        com.example.demo.Entity.TourPackageEntity.PackageState.NOT_AVAILABLE
-    )
-    AND p.endDate > :now
-
-    AND (
-        :destination IS NULL
-        OR LOWER(p.destination)
-        LIKE LOWER(CONCAT('%', :destination, '%'))
-    )
-
-    AND (
-        :minPrice IS NULL
-        OR p.prize >= :minPrice
-    )
-
-    AND (
-        :maxPrice IS NULL
-        OR p.prize <= :maxPrice
-    )
-
-    AND (
-        :duration IS NULL
-        OR p.duration = :duration
-    )
-
-    AND (
-        :tripType IS NULL
-        OR LOWER(p.tripType) = LOWER(:tripType)
-    )
-""")
+        SELECT p
+        FROM TourPackageEntity p
+        WHERE p.packageState IN (
+            com.example.demo.Entity.TourPackageEntity.PackageState.AVAILABLE,
+            com.example.demo.Entity.TourPackageEntity.PackageState.NOT_AVAILABLE
+        )
+        AND p.endDate > :now
+    
+        AND (
+            :destination IS NULL
+            OR LOWER(p.destination)
+            LIKE CONCAT('%', :destination, '%')
+        )
+    
+        AND (
+            :minPrice IS NULL
+            OR p.prize >= :minPrice
+        )
+    
+        AND (
+            :maxPrice IS NULL
+            OR p.prize <= :maxPrice
+        )
+    
+        AND (
+            :duration IS NULL
+            OR p.duration = :duration
+        )
+    
+        AND (
+            :tripType IS NULL
+            OR LOWER(p.tripType) = :tripType
+        )
+    """)
     List<TourPackageEntity> searchPackages(
             @Param("destination") String destination,
             @Param("minPrice") BigDecimal minPrice,
