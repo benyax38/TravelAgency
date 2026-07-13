@@ -50,7 +50,11 @@ const Sidebar = () => {
     }}>
       <h2 style={{ padding: "20px", color: "#0066cc", textAlign: "center" }}>Agencia Viajes</h2>
       
-      <nav style={{ flexGrow: 1 }}>
+      <nav style={{
+          flexGrow: 1,
+          overflowY: "auto",
+          minHeight: 0
+      }}>
         {/* SECCIÓN USUARIO */}
         {(isUser || isAdmin) && (
           <div className="section">
@@ -100,6 +104,20 @@ const Sidebar = () => {
                     }}
                 >
                     Ver carrito
+                </Link>
+                <Link 
+                    to="/user/reservas" 
+                    style={{ 
+                        display: "block", 
+                        padding: "10px 20px", 
+                        color: "white", 
+                        textDecoration: "none",
+                        border: "1px solid #333",
+                        marginBottom: "5px",
+                        borderRadius: "4px"
+                    }}
+                >
+                    Mis reservas
                 </Link>
                 <Link to="/pagos" style={linkStyle}>Ver pagos</Link>
               </div>

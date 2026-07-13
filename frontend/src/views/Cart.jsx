@@ -111,9 +111,11 @@ const Cart = () => {
 
             // Navegar al resumen
             navigate(
-                `/reservation-detail/${reservation.reservationId}`,
+                "/payment",
                 {
-                    state: reservation
+                    state: {
+                        reservation
+                    }
                 }
             );
 

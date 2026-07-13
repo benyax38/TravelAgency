@@ -8,4 +8,8 @@ const getAllReservations = () => {
   return httpClient.get('/reservations');
 };
 
-export default { createReservation, getAllReservations };
+const getMyReservations = () => {
+  return httpClient.get('/reservations/my');
+};
+
+export default { createReservation, getAllReservations, getMyReservations };

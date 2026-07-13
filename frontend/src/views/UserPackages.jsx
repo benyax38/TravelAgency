@@ -49,6 +49,10 @@ const UserPackages = () => {
 
     const addToCart = (pkg) => {
 
+        if (pkg.packageState !== "AVAILABLE") {
+            return;
+        }
+
         const currentCart =
             JSON.parse(localStorage.getItem('cart')) || [];
 
@@ -261,9 +265,18 @@ const UserPackages = () => {
 
                                         {/* AGREGAR CARRITO */}
                                         <button
-                                            className="btn btn-success btn-sm"
-                                            title="Agregar al carrito"
+                                            className={`btn btn-sm ${
+                                                pkg.packageState === "AVAILABLE"
+                                                    ? "btn-success"
+                                                    : "btn-secondary"
+                                            }`}
+                                            title={
+                                                pkg.packageState === "AVAILABLE"
+                                                    ? "Agregar al carrito"
+                                                    : "Paquete no disponible"
+                                            }
                                             onClick={() => addToCart(pkg)}
+                                            disabled={pkg.packageState !== "AVAILABLE"}
                                         >
                                             ➕
                                         </button>

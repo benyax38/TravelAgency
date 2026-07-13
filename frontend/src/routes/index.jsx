@@ -7,8 +7,9 @@ import AdminPackages from '../views/AdminPackages';
 import AdminUsers from '../views/AdminUsers';
 import AdminReservations from '../views/AdminReservation';
 import UserPackages from '../views/UserPackages';
+import UserReservation from '../views/UserReservation';
 import Cart from '../views/Cart';
-import ReservationDetail from '../views/ReservationDetail';
+import PaymentPage from '../views/PaymentPage';
 import NotFound from '../views/NotFound';
 
 // Definimos el componente de rutas y lo exportamos por defecto
@@ -23,8 +24,9 @@ export default function AppRoutes() {
       <Route path="/admin/usuarios" element={<AdminUsers />} />
       <Route path="/admin/reservas" element={<AdminReservations />} />
       <Route path="/user/paquetes" element={<UserPackages />} />
+      <Route path="/user/reservas" element={<UserReservation />} />
       <Route path="/carrito" element={<Cart />} />
-      <Route path="/reservation-detail/:id" element={<ReservationDetail />} />
+      <Route path="/payment" element={<PaymentPage />} />
       {/* Ruta 404 para cuando no encuentra la página */}
       <Route path="*" element={<NotFound />} />
     </Routes>

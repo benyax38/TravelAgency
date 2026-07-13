@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import discountService from "../../services/discount-service";
 import EditModal from "./EditModalDiscounts";
-import "./AdminConfigDiscount.css";
 
 function AdminConfigDiscount() {
 

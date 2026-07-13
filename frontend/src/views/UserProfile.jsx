@@ -168,8 +168,7 @@ export default function Profile() {
           <h3 className="text-light mb-3">
             👤 Mi Perfil
           </h3>
-
-          <p className="text-white"><b>ID Keycloak:</b> {user.keycloakId}</p>
+          
           <p className="text-white"><b>Username:</b> {user.username}</p>
           <p className="text-white"><b>Email:</b> {user.email}</p>
           <p className="text-white"><b>Nombre:</b> {user.firstName}</p>
