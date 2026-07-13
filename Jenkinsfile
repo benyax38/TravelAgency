@@ -13,6 +13,7 @@ pipeline {
         stage('Test Backend') {
             steps {
                 dir('backend') {
+                    sh 'chmod +x mvnw'
                     sh './mvnw clean package -DskipTests' // Asegura el 90% de cobertura aquí
                 }
             }
