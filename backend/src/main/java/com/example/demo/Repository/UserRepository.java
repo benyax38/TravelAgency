@@ -11,4 +11,6 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
 
     // Busca un usuario en la base de datos mediante el keycloakId
     Optional<UserEntity> findByKeycloakId(String keycloakId);
+
+    UserEntity findByUsername(String username);
 }

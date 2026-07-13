@@ -42,9 +42,15 @@ public class ReservationController {
                 .body(response);
     }
 
-    // READ
+    // READ admin
     @GetMapping
     public List<ReservationEntity> getAllReservationsController() {
         return reservationService.getAllReservations();
+    }
+
+    // READ user
+    @GetMapping("/my")
+    public List<ReservationSummaryDTO> getMyReservations() {
+        return reservationService.getReservationsByUser();
     }
 }

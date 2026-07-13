@@ -46,6 +46,37 @@ public class ReservationService {
         this.discountApplicationService = discountApplicationService;
     }
 
+    private ReservationSummaryDTO buildReservationSummaryDTO(
+            ReservationEntity reservation) {
+
+        return ReservationSummaryDTO.builder()
+                .reservationId(
+                        reservation.getReservationId()
+                )
+                .reservationState(
+                        reservation.getReservationState().name()
+                )
+                .reservationDate(
+                        reservation.getReservationDate()
+                )
+                .paymentDeadline(
+                        reservation.getPaymentDeadline()
+                )
+                .passengersNum(
+                        reservation.getPassengersNum()
+                )
+                .subtotalAmount(
+                        reservation.getSubtotalAmount()
+                )
+                .discountAmount(
+                        reservation.getDiscountAmount()
+                )
+                .totalAmount(
+                        reservation.getTotalAmount()
+                )
+                .build();
+    }
+
     /*
      * createReservation
      * Descripcion: Metodo orquestador para la creacion de reservas
@@ -112,32 +143,7 @@ public class ReservationService {
         // Persistencia en bd
         reservation = reservationRepository.save(reservation);
 
-        return ReservationSummaryDTO.builder()
-                .reservationId(
-                        reservation.getReservationId()
-                )
-                .reservationState(
-                        reservation.getReservationState().name()
-                )
-                .reservationDate(
-                        reservation.getReservationDate()
-                )
-                .paymentDeadline(
-                        reservation.getPaymentDeadline()
-                )
-                .passengersNum(
-                        reservation.getPassengersNum()
-                )
-                .subtotalAmount(
-                        reservation.getSubtotalAmount()
-                )
-                .discountAmount(
-                        reservation.getDiscountAmount()
-                )
-                .totalAmount(
-                        reservation.getTotalAmount()
-                )
-                .build();
+        return buildReservationSummaryDTO(reservation);
     }
 
     /*
@@ -206,20 +212,17 @@ public class ReservationService {
      * Descripcion: Metodo orquestador de validaciones
      * Entrada: DTO de entrada + Lista de paquetes
      * Salida: void
-     * */
-    public void validateReservation(ReservationRequestDTO reservationDTO, List<TourPackageEntity> tourPackages
+     */
+    public void validateReservation(
+            ReservationRequestDTO reservationDTO,
+            List<TourPackageEntity> tourPackages
     ) {
-        // Valida número de pasajeros
+
+        // 1. Valida número de pasajeros
         validatePassengersNumber(reservationDTO);
 
-        // Valida disponibilidad de los paquetes
-        validatePackagesAvailability(
-                reservationDTO,
-                tourPackages
-        );
-
-        // Valida estado de los paquetes
-        validatePackagesState(tourPackages);
+        // 2. Valida estado + disponibilidad de los paquetes
+        validatePackagesAvailabilityAndState(reservationDTO, tourPackages);
     }
 
     /*
@@ -242,74 +245,58 @@ public class ReservationService {
     }
 
     /*
-     * validatePackagesAvailability
-     * Descripcion: Para cada paquete comprueba:
-     *  1. Que tenga cupos disponibles
-     *  2. Que la cantidad de pasajeros no supere a los cupos disponibles
-     * Entrada: DTO de entrada + Lista de paquetes
+     * validatePackagesAvailabilityAndState
+     * Descripción: Valida que los paquetes sean reservables:
+     *  1. Estado válido para reserva
+     *  2. Disponibilidad de cupos
+     *  3. Cantidad de pasajeros no exceda los cupos
+     * Entrada: DTO de reserva + lista de paquetes
      * Salida: void
-     * */
-    private void validatePackagesAvailability(
+     */
+    private void validatePackagesAvailabilityAndState(
             ReservationRequestDTO reservationDTO,
             List<TourPackageEntity> tourPackages
     ) {
 
+        if (tourPackages == null || tourPackages.isEmpty()) {
+            return;
+        }
+
         for (TourPackageEntity tourPackage : tourPackages) {
 
-            Integer availableSlots =
-                    tourPackage.getAvailableSlots();
+            String packageName = tourPackage.getPackageName();
+            TourPackageEntity.PackageState state = tourPackage.getPackageState();
+            Integer availableSlots = tourPackage.getAvailableSlots();
 
-            if (availableSlots == null ||
-                    availableSlots <= 0) {
+            // 1. Validar estado del paquete
+            if (state == TourPackageEntity.PackageState.NOT_AVAILABLE ||
+                    state == TourPackageEntity.PackageState.SOLD_OUT ||
+                    state == TourPackageEntity.PackageState.CANCELLED) {
+
+                throw new IllegalArgumentException(
+                        "No se puede reservar el paquete '" +
+                                packageName +
+                                "' (estado: " + state + ")"
+                );
+            }
+
+            // 2. Validar cupos disponibles
+            if (availableSlots == null || availableSlots <= 0) {
 
                 throw new IllegalArgumentException(
                         "El paquete '" +
-                                tourPackage.getPackageName() +
+                                packageName +
                                 "' no tiene cupos disponibles"
                 );
             }
 
-            if (reservationDTO.getPassengersNum() >
-                    availableSlots) {
+            // 3. Validar número de pasajeros
+            if (reservationDTO.getPassengersNum() > availableSlots) {
 
                 throw new IllegalArgumentException(
-                        "La cantidad de pasajeros excede " +
-                                "los cupos disponibles del paquete '" +
-                                tourPackage.getPackageName() +
+                        "La cantidad de pasajeros excede los cupos disponibles del paquete '" +
+                                packageName +
                                 "' (" + availableSlots + ")"
-                );
-            }
-        }
-    }
-
-    /*
-     * validatePackageState
-     * Descripcion: Evita que se reserven paquetes con estado NOT_AVAILABLE, SOLD_OUT o CANCELLED
-     * Entrada: Lista de paquetes
-     * Salida: void
-     * */
-    private void validatePackagesState(
-            List<TourPackageEntity> tourPackages
-    ) {
-
-        for (TourPackageEntity tourPackage : tourPackages) {
-
-            TourPackageEntity.PackageState state =
-                    tourPackage.getPackageState();
-
-            if (state ==
-                    TourPackageEntity.PackageState.NOT_AVAILABLE ||
-
-                    state ==
-                            TourPackageEntity.PackageState.SOLD_OUT ||
-
-                    state ==
-                            TourPackageEntity.PackageState.CANCELLED) {
-
-                throw new IllegalArgumentException(
-                        "No se puede reservar el paquete '" +
-                                tourPackage.getPackageName() +
-                                "' (estado: " + state + ")"
                 );
             }
         }
@@ -529,5 +516,14 @@ public class ReservationService {
     // READ
     public List<ReservationEntity> getAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public List<ReservationSummaryDTO> getReservationsByUser() {
+        UserEntity user = getAuthenticatedUser();
+        List<ReservationEntity> reservations =
+                reservationRepository.findByUser(user);
+        return reservations.stream()
+                .map(this::buildReservationSummaryDTO)
+                .toList();
     }
 }

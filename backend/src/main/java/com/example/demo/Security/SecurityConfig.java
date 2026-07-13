@@ -41,23 +41,6 @@ public class SecurityConfig {
                         // Permite cualquier metodo y cualquier sub-ruta dentro de ese path
                         .requestMatchers("/api/v1/internal/events/**").permitAll()
 
-                        // LECTURA GENÉRICA
-                        .requestMatchers(HttpMethod.GET, "/api/**")
-                        .hasAnyRole("ADMIN", "USER")
-
-                        // ESCRITURA ADMIN GENÉRICA
-                        .requestMatchers(HttpMethod.POST, "/api/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.PUT, "/api/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.PATCH, "/api/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.DELETE, "/api/**")
-                        .hasRole("ADMIN")
-
                         // Cualquier otra request
                         .anyRequest().authenticated()
                 )
