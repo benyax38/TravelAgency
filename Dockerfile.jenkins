@@ -1,5 +1,7 @@
 FROM jenkins/jenkins:lts-jdk21
 USER root
+# Instalamos docker y añadimos al usuario jenkins al grupo docker
 RUN apt-get update && apt-get install -y docker.io
-RUN usermod -aG docker jenkins
+# Esto crea el grupo y agrega al usuario jenkins
+RUN groupadd -f docker && usermod -aG docker jenkins
 USER jenkins

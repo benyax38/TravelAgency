@@ -21,9 +21,6 @@ pipeline {
         stage('Build & Push Images') {
             steps {
                 script {
-                    // Ajuste temporal para la evaluación: asegurar acceso al socket
-                    sh 'chmod 666 /var/run/docker.sock'
-
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
                         def backendImage = docker.build("${DOCKER_HUB_USER}/backend:latest", "./backend")
                         backendImage.push()
